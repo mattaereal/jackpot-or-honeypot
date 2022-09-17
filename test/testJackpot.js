@@ -17,19 +17,29 @@ describe("Testing jackpot", function () {
         jackpot = await jackpotContract.deploy(jackpotProxy.address, {
             value: ethers.utils.parseEther("2"),
         })
-        await jackpot.connect(user)
-        await jackpotProxy.connect(user)
-        await setBalance(await user.getAddress(), ethers.utils.parseEther("0.2"));
+
+        // await setBalance(await user.getAddress(), ethers.utils.parseEther("0.2"));
+
+        console.log(`user: ${await user.getAddress()}`)
+        console.log(`deployer: ${await deployer.getAddress()}`)
+        console.log(`proxy: ${await jackpotProxy.address}`)
+        console.log(`jackpot: ${await jackpot.address}`)
+
+        // await jackpotProxy.connect(user)
+        // await jackpot.connect(user)
+        
 
         return {jackpot, jackpotProxy, user}
     }
 
     it("is Honeypot!", async function () {
         const {jackpot, jackpotProxy, user} = await loadFixture(deployJackpotFixture)
+
         
         balanceBefore = await user.getBalance()
-        await jackpotProxy.claimPrize(jackpot.address, { value: ethers.utils.parseEther("0.2") })
+        await jackpotProxy.connect(user).claimPrize(jackpot.address, { value: ethers.utils.parseEther("0.2") })
         balanceAfter = await user.getBalance()
+        console.log(await ethers.provider.getBalance(user.getAddress()))
         
         expect(balanceAfter < balanceBefore).to.be.true
     })
@@ -38,9 +48,9 @@ describe("Testing jackpot", function () {
         const {jackpot, jackpotProxy, user} = await loadFixture(deployJackpotFixture)
 
         balanceBefore = await user.getBalance()
-        await jackpotProxy.claimPrize256(jackpot.address, { value: ethers.utils.parseEther("0.2") })
+        await jackpotProxy.connect(user).claimPrize256(jackpot.address, { value: ethers.utils.parseEther("0.2") })
         balanceAfter = await user.getBalance()
-        
+
         expect(balanceAfter > balanceBefore).to.be.true
         
     })

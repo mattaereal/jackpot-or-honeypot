@@ -16,32 +16,32 @@ contract Jackpot {
     }
 
     function claimPrize(uint amount) external payable onlyJackpotProxy {
-        console.log("\t called Jackpot.claimPrize(%s)", amount);
+        console.log("\t %s called Jackpot.claimPrize(%s)", msg.sender, amount);
         payable(msg.sender).transfer(amount * 2);
     }
 
     fallback() payable external {
-        console.log("\t called fallback() with msg.value: %s", msg.value);
+        console.log("\t %s called fallback() with msg.value: %s", msg.sender, msg.value);
     }
 }
 
 contract JackpotProxy {
 
     function claimPrize(address jackpot) external payable {
-        console.log("\t called JackpotProxy.claimPrize(%s)", jackpot);
+        console.log("\t %s called JackpotProxy.claimPrize(%s)", msg.sender, jackpot);
         uint amount = msg.value;
         require(amount > 0, "zero deposit");
-        console.log("\t trying to call jackpot.claimPrize(uint) with msg.value: %s", amount );
+        console.log("\t %s is trying to call jackpot.claimPrize(uint) with msg.value: %s", msg.sender, amount );
         (bool success, ) = jackpot.call{value: amount}(abi.encodeWithSignature("claimPrize(uint)", amount));
         require(success, "failed");
         payable(msg.sender).transfer(address(this).balance);
     }
 
     function claimPrize256(address jackpot) external payable {
-        console.log("\t called JackpotProxy.safe_claimPrize(%s)", jackpot);
+        console.log("\t %s called JackpotProxy.safe_claimPrize(%s)", msg.sender, jackpot);
         uint amount = msg.value;
         require(amount > 0, "zero deposit");
-        console.log("\t trying to call jackpot.claimPrize(uint256) with msg.value: %s", amount );
+        console.log("\t %s is trying to call jackpot.claimPrize(uint256) with msg.value: %s", msg.sender, amount );
         (bool success, ) = jackpot.call{value: amount}(abi.encodeWithSignature("claimPrize(uint256)", amount));
         require(success, "failed");
         payable(msg.sender).transfer(address(this).balance);
