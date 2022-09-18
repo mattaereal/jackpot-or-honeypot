@@ -49,4 +49,9 @@ contract JackpotProxy {
 
     receive() payable external {}
 
+    function test() public view {
+        console.logBytes(abi.encodeWithSignature("claimPrize(uint)", 1 ether));
+        console.logBytes(abi.encodeWithSignature("claimPrize(uint256)", 1 ether));
+    }
+
 }
