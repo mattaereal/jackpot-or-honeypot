@@ -61,4 +61,19 @@ describe("Testing jackpot", function () {
 
         expect(balanceBefore, balanceAfter.add(balanceDiff)).to.be.equal
     })
+
+    it("is jackpot! (claimPrizeSafe())", async function () {
+        const { jackpot, jackpotProxy, user } = await loadFixture(deployJackpotFixture)
+
+        balanceBefore = await user.getBalance()
+        amount = ethers.utils.parseEther("0.2")
+
+        tx = await jackpotProxy.claimPrizeSafe(jackpot.address, { value: amount })
+        txCost = await getTxCost(tx.hash)
+
+        balanceAfter = await user.getBalance()
+        balanceDiff = amount.mul(2).add(txCost)
+
+        expect(balanceBefore, balanceAfter.add(balanceDiff)).to.be.equal
+    })
 })

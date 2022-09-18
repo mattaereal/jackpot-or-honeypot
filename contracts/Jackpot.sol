@@ -10,48 +10,65 @@ contract Jackpot {
         jackpotProxy = _jackpotProxy;
     }
 
-    modifier onlyJackpotProxy {
+    modifier onlyJackpotProxy() {
         require(msg.sender == jackpotProxy);
         _;
     }
 
-    function claimPrize(uint amount) external payable onlyJackpotProxy {
+    function claimPrize(uint256 amount) external payable onlyJackpotProxy {
         console.log("\t %s called Jackpot.claimPrize(%s)", msg.sender, amount);
         payable(msg.sender).transfer(amount * 2);
     }
 
-    fallback() payable external {
+    fallback() external payable {
         console.log("\t %s called fallback() with msg.value: %s", msg.sender, msg.value);
     }
 }
 
 contract JackpotProxy {
-
     function claimPrize(address jackpot) external payable {
         console.log("\t %s called JackpotProxy.claimPrize(%s)", msg.sender, jackpot);
-        uint amount = msg.value;
+        uint256 amount = msg.value;
         require(amount > 0, "zero deposit");
-        console.log("\t %s is trying to call jackpot.claimPrize(uint) with msg.value: %s", msg.sender, amount );
-        (bool success, ) = jackpot.call{value: amount}(abi.encodeWithSignature("claimPrize(uint)", amount));
+        console.log(
+            "\t %s is trying to call jackpot.claimPrize(uint) with msg.value: %s",
+            msg.sender,
+            amount
+        );
+        (bool success, ) = jackpot.call{value: amount}(
+            abi.encodeWithSignature("claimPrize(uint)", amount)
+        );
         require(success, "failed");
         payable(msg.sender).transfer(address(this).balance);
     }
 
     function claimPrize256(address jackpot) external payable {
         console.log("\t %s called JackpotProxy.safe_claimPrize(%s)", msg.sender, jackpot);
-        uint amount = msg.value;
+        uint256 amount = msg.value;
         require(amount > 0, "zero deposit");
-        console.log("\t %s is trying to call jackpot.claimPrize(uint256) with msg.value: %s", msg.sender, amount );
-        (bool success, ) = jackpot.call{value: amount}(abi.encodeWithSignature("claimPrize(uint256)", amount));
+        console.log(
+            "\t %s is trying to call jackpot.claimPrize(uint256) with msg.value: %s",
+            msg.sender,
+            amount
+        );
+        (bool success, ) = jackpot.call{value: amount}(
+            abi.encodeWithSignature("claimPrize(uint256)", amount)
+        );
         require(success, "failed");
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    receive() payable external {}
+    function claimPrizeSafe(Jackpot jackpot) external payable {
+        uint256 amount = msg.value;
+        require(amount > 0, "zero deposit");
+        jackpot.claimPrize{value: amount}(amount);
+        payable(msg.sender).transfer(address(this).balance);
+    }
 
-    function test() public view {
+    receive() external payable {}
+
+    function encode() public view {
         console.logBytes(abi.encodeWithSignature("claimPrize(uint)", 1 ether));
         console.logBytes(abi.encodeWithSignature("claimPrize(uint256)", 1 ether));
     }
-
 }
